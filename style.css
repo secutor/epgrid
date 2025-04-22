@@ -1,0 +1,38 @@
+.container {
+  display: flex; /* or inline-flex */
+  flex-direction: row;
+  justify-content: flex-start; 
+  min-height: 50px;
+  list-style-type: none;
+}
+
+.item {
+ 	background: #2C2C84FF;
+  	margin-right: 1px;
+  	padding: 10px;
+  	padding-bottom: 10px;
+  	color: white;
+  	font-weight: bold;
+  	font-size: .75em;
+  	text-align: center;
+  	word-wrap: break-word;
+}
+
+.channel {
+    background: #E3E0FFFF;
+    min-width: 100px;
+    max-width: 100px;
+    margin-right: 3px;
+    padding: 10px;
+    padding-bottom: 10px;
+    color: black;
+    font-weight: bold;
+    font-size: .75em;
+    text-align: center;
+    word-wrap: break-word;
+}
+
+label {
+    display: inline-block;
+    vertical-align: top;
+}
