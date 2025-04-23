@@ -4,7 +4,7 @@ import datetime
 
 import requests
 
-URL = "TVHEADEND_API_ENDPOINT" #'http://user:pw@IP:9981/api/epg/events/grid?channelTag=TAGNAME&limit=1000'
+URL = "" #'http://user:pw@IP:9981/api/epg/events/grid?channelTag=TAGNAME&limit=1000'
 
 def get_epg_info():
     r = requests.get(URL)
@@ -55,9 +55,14 @@ def nextHoursHtml(epgd, hours = 3):
         coi = epgd[channel]
         for startt in sorted(coi):
             delta = startt-now
+            running = (now - startt).seconds < 0 and (coi[startt]["end"]-now).seconds > 0
             if delta.days == 0:
-                if delta.seconds >= 0 and delta.seconds < 60.0*60*hours:
-                    listor.append([coi[startt]["title"], (coi[startt]["end"]-now).seconds, coi[startt]["desc"], channel])
+                if delta.seconds >= 0 and delta.seconds < 60.0*60*hours or running:
+                    shortstart = datetime.date.strftime(startt, "%H:%M") 
+                    shortend = datetime.date.strftime(coi[startt]["end"], "%H:%M") 
+                    timerange = f'{shortstart} - {shortend} - {int((coi[startt]["end"]-now).seconds/60)}min\n'
+                    listor.append([coi[startt]["title"], (coi[startt]["end"]-now).seconds, coi[startt]["desc"], timerange])
+                    
                     print([coi[startt]["title"], (coi[startt]["end"]-startt).seconds])
         content = []
         channel_names.append(channel_tag.format(channel))
@@ -67,7 +72,7 @@ def nextHoursHtml(epgd, hours = 3):
                 continue
             width = int(int(l[1])/60.0 * 10)
             title = l[0]
-            desc = l[2]
+            desc = l[3] + l[2]
             content.append(entry.format(width, title, desc, title))
         coll.append(content)
     with open("epgwall.html", "w") as o:
