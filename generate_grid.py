@@ -4,7 +4,7 @@ import datetime
 
 import requests
 
-URL = "" #'http://user:pw@IP:9981/api/epg/events/grid?channelTag=TAGNAME&limit=1000'
+URL = 'URL'
 
 def get_epg_info():
     r = requests.get(URL)
@@ -26,12 +26,22 @@ def convert_epg_info(epg_info):
                                  "subtitle":entry.get('subtitle', ""), 
                                  "desc":entry.get('description', ""), "end":endt}
     for channel, progs in epgd.items():
-        if "RTL" in channel:
+        if "DANIEL" in channel:
             for start in progs:
-                print(channel, start, progs[start]["end"])
+                print(channel, start, 
+                      (datetime.datetime.now()-start).seconds, 
+                      (progs[start]["end"]-start).seconds,
+                      progs[start]["end"], 
+                      progs[start]["desc"])
 
     return epgd
 
+def is_running(program, starttime):
+    ran = (datetime.datetime.now()-starttime).seconds
+    length = (program["end"]-starttime).seconds
+    if length - ran > 0:
+        return 1
+    return 0
 
 def nextHoursHtml(epgd, hours = 3):
     """
@@ -45,6 +55,7 @@ def nextHoursHtml(epgd, hours = 3):
     channel_tag = "<label>{} </label>\n"
     footer = '<script>\n$(document).ready(function(){\n    $(\'[data-toggle="popover"]\').popover({placement: "auto"});\n});\n</script></body>\n</html>'
     entry = '<li class = "item", style="width: {}px"; , data-toggle="popover" title="{}" data-content="{}">{}</li>\n'
+    running_entry = '<li class = "running_item", style="width: {}px"; , data-toggle="popover" title="{}" data-content="{}">{}</li>\n'
     channel_entry = '<li class = "channel", style="width: 150px";>{}</li>\n'    
     now = datetime.datetime.now()
     coll = []
@@ -55,24 +66,28 @@ def nextHoursHtml(epgd, hours = 3):
         coi = epgd[channel]
         for startt in sorted(coi):
             delta = startt-now
-            running = (now - startt).seconds < 0 and (coi[startt]["end"]-now).seconds > 0
-            if delta.days == 0:
-                if delta.seconds >= 0 and delta.seconds < 60.0*60*hours or running:
-                    shortstart = datetime.date.strftime(startt, "%H:%M") 
-                    shortend = datetime.date.strftime(coi[startt]["end"], "%H:%M") 
-                    timerange = f'{shortstart} - {shortend} - {int((coi[startt]["end"]-now).seconds/60)}min\n'
-                    listor.append([coi[startt]["title"], (coi[startt]["end"]-now).seconds, coi[startt]["desc"], timerange])
-                    
-                    print([coi[startt]["title"], (coi[startt]["end"]-startt).seconds])
+            running = is_running(coi[startt], startt)
+            
+            
+            if (delta.seconds >= 0 and delta.seconds < 60.0*60*hours and delta.days == 0) or running:
+                shortstart = datetime.date.strftime(startt, "%H:%M") 
+                shortend = datetime.date.strftime(coi[startt]["end"], "%H:%M") 
+                timerange = f'{shortstart} - {shortend} - {int((coi[startt]["end"]-now).seconds/60)}min\n'
+                listor.append([coi[startt]["title"], (coi[startt]["end"]-now).seconds, coi[startt]["desc"], timerange, running])
         content = []
         channel_names.append(channel_tag.format(channel))
         for i, l in enumerate(listor):
+            
             if i == 0:
                 content.append(channel_entry.format(l))
                 continue
             width = int(int(l[1])/60.0 * 10)
             title = l[0]
             desc = l[3] + l[2]
+            if i == 1:
+                content.append(running_entry.format(width, title, desc, title))
+                continue
+            
             content.append(entry.format(width, title, desc, title))
         coll.append(content)
     with open("epgwall.html", "w") as o:

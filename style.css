@@ -18,8 +18,18 @@
   	word-wrap: break-word;
 }
 
+.running_item {
+    background: #c65f5f;
+    margin-right: 1px;
+    padding: 10px;
+    padding-bottom: 10px;
+    color: white;
+    font-weight: bold;
+    font-size: .75em;   
+}
+
 .channel {
-    background: #E3E0FFFF;
+    background: #e3e0ff40;
     min-width: 100px;
     max-width: 100px;
     margin-right: 3px;
