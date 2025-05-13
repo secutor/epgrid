@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="de">
+  <head>
+ <link rel="stylesheet" href="style.css">
+ <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<title>Titel</title>
+</head>
+<body>
+
+{% for channel in epg|sort %}
+<ul class="container">
+  <li class = "channel", style="width: 150px";>{{ channel}}</li>
+  {% for startt, item in epg[channel].items() %}
+    {% if item.running %}
+    
+    <li class = "running_item", style="width: {{ item.width }}px"; , data-toggle="popover" title="{{ item.title }}" data-content="{{ item.timerange }} - {{ item.description }}">{{ item.title }}</li>
+    {% else %}
+    <li class = "item", style="width: {{ item.width }}px"; , data-toggle="popover" title="{{ item.title }}" data-content="{{ item.timerange }} - {{ item.description }}">{{ item.title }}</li>
+    {% endif %}
+  {% endfor %}    
+</ul>
+{% endfor %}
+
+<script>
+$(document).ready(function(){
+    $('[data-toggle="popover"]').popover({placement: "auto"});
+});
+</script></body>
+</html>
